@@ -1,0 +1,18 @@
+[submodule ".vim/pack/github/start/copilot.vim"]
+	path = .vim/pack/github/start/copilot.vim
+	url = https://github.com/github/copilot.vim.git
+[submodule ".vim/pack/vendor/start/nerdtree"]
+	path = .vim/pack/vendor/start/nerdtree
+	url = https://github.com/preservim/nerdtree.git
+[submodule ".vim/plugged/ale"]
+	path = .vim/plugged/ale
+	url = https://github.com/dense-analysis/ale.git
+[submodule ".vim/plugged/fzf"]
+	path = .vim/plugged/fzf
+	url = https://github.com/junegunn/fzf.vim.git
+[submodule ".vim/plugged/fzf.vim"]
+	path = .vim/plugged/fzf.vim
+	url = https://github.com/junegunn/fzf.vim.git
+[submodule ".vim/plugged/vimspector"]
+	path = .vim/plugged/vimspector
+	url = https://github.com/puremourning/vimspector.git
