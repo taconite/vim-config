@@ -431,6 +431,9 @@ nnoremap <leader>f :<C-u>ALEFix<CR>
 autocmd FileType python vnoremap <leader>f :!black-macchiato<CR>
 " Mapping for hover information
 nnoremap <leader>h :ALEHover<CR>
+" Mapping for ALEGoToDefinition
+nnoremap <leader>d :ALEGoToDefinition<CR>
+nnoremap <leader>dt :ALEGoToDefinition -tab<CR>
 " " Mapping for Python documentation
 " function! ShowPydocForVisualSelection()
 "     " Save the current visual selection to a variable
