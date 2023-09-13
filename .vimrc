@@ -399,6 +399,8 @@ Plug 'dense-analysis/ale'
 
 Plug 'puremourning/vimspector'
 
+Plug 'preservim/nerdtree'
+
 " Initialize plugin system
 " - Automatically executes `filetype plugin indent on` and `syntax enable`.
 call plug#end()
