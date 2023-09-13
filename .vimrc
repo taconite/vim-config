@@ -400,6 +400,7 @@ Plug 'dense-analysis/ale'
 Plug 'puremourning/vimspector'
 
 Plug 'preservim/nerdtree'
+Plug 'github/copilot.vim'
 
 " Initialize plugin system
 " - Automatically executes `filetype plugin indent on` and `syntax enable`.
