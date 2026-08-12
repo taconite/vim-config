@@ -25,6 +25,7 @@ opt.matchtime = 2
 opt.errorbells = false
 opt.visualbell = false
 opt.foldcolumn = "1"
+opt.signcolumn = "yes:2"
 opt.background = "dark"
 opt.encoding = "utf-8"
 opt.fileformats = { "unix", "dos", "mac" }
@@ -215,6 +216,123 @@ require("lazy").setup({
   },
   {
     "preservim/nerdtree",
+  },
+  {
+    "nvim-mini/mini.diff",
+    config = function()
+      local minidiff = require("mini.diff")
+      minidiff.setup({
+        view = {
+          style = "sign",
+          signs = { add = "+", change = "~", delete = "-" },
+        },
+        mappings = {
+          apply = "",
+          reset = "",
+          textobject = "ih",
+          goto_first = "",
+          goto_prev = "[c",
+          goto_next = "]c",
+          goto_last = "",
+        },
+      })
+
+      local function set_minidiff_highlights()
+        local highlights = {
+          MiniDiffSignAdd = { fg = "#5faf5f", ctermfg = 71 },
+          MiniDiffSignChange = { fg = "#ffaf00", ctermfg = 214 },
+          MiniDiffSignDelete = { fg = "#ff5f5f", ctermfg = 203 },
+          MiniDiffOverAdd = { fg = "#ffffff", bg = "#005f00", ctermfg = 231, ctermbg = 22 },
+          MiniDiffOverChange = { fg = "#ffffff", bg = "#870000", ctermfg = 231, ctermbg = 88 },
+          MiniDiffOverChangeBuf = { fg = "#ffffff", bg = "#005f00", ctermfg = 231, ctermbg = 22 },
+          MiniDiffOverContext = { fg = "#ffffff", bg = "#5f0000", ctermfg = 231, ctermbg = 52 },
+          MiniDiffOverContextBuf = {},
+          MiniDiffOverDelete = { fg = "#ffffff", bg = "#5f0000", ctermfg = 231, ctermbg = 52 },
+        }
+
+        for group, opts in pairs(highlights) do
+          vim.api.nvim_set_hl(0, group, opts)
+        end
+      end
+
+      set_minidiff_highlights()
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        callback = set_minidiff_highlights,
+        desc = "Restore clear mini.diff add/change/delete colors",
+      })
+
+      -- Diff current buffer against an arbitrary git ref (branch/commit/tag).
+      -- pi.nvim hunk commands read MiniDiff.get_buf_data(), so they keep
+      -- working with this reference text.
+      local function git_base_source(base)
+        local name = "git-base:" .. base
+        return {
+          name = name,
+          attach = function(buf_id)
+            local buf_name = vim.api.nvim_buf_get_name(buf_id)
+            if buf_name == "" then
+              return minidiff.fail_attach(buf_id)
+            end
+            local path = vim.uv.fs_realpath(buf_name) or vim.fn.fnamemodify(buf_name, ":p")
+            local cwd = vim.fn.fnamemodify(path, ":h")
+            local obj = base .. ":./" .. vim.fn.fnamemodify(path, ":t")
+            -- Ignore results if the buffer switched source while git ran
+            local function is_active()
+              if not vim.api.nvim_buf_is_valid(buf_id) then
+                return false
+              end
+              local data = minidiff.get_buf_data(buf_id)
+              local source = data and data.config.source
+              return source ~= nil and source.name == name
+            end
+            -- Validate the ref first (also fails outside a git repo) so that
+            -- a failed `git show` unambiguously means the path has no blob
+            -- at the ref, i.e. a new file relative to it.
+            vim.system({ "git", "rev-parse", "--verify", "--quiet", base }, { cwd = cwd }, function(ver)
+              vim.schedule(function()
+                if not is_active() then
+                  return
+                end
+                if ver.code ~= 0 then
+                  return minidiff.fail_attach(buf_id)
+                end
+                vim.system({ "git", "show", obj }, { cwd = cwd }, function(out)
+                  vim.schedule(function()
+                    if not is_active() then
+                      return
+                    end
+                    if out.code ~= 0 then
+                      return minidiff.set_ref_text(buf_id, "")
+                    end
+                    minidiff.set_ref_text(buf_id, out.stdout:gsub("\r\n", "\n"))
+                  end)
+                end)
+              end)
+            end)
+          end,
+          detach = function() end,
+        }
+      end
+
+      vim.api.nvim_create_user_command("DiffBase", function(opts)
+        local bufnr = vim.api.nvim_get_current_buf()
+        if opts.args == "" then
+          vim.b[bufnr].minidiff_config = nil
+        else
+          vim.b[bufnr].minidiff_config = { source = git_base_source(opts.args) }
+        end
+        minidiff.disable(bufnr)
+        minidiff.enable(bufnr)
+      end, {
+        nargs = "?",
+        desc = "Diff buffer against a git ref; no argument restores diff against the index",
+      })
+    end,
+  },
+  {
+    dir = "/home/shaofeiw/Tools/pi-nvim",
+    name = "pi.nvim",
+    lazy = false,
   },
 }, {
   lockfile = config_dir .. "/lazy-lock.json",
