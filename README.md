@@ -46,6 +46,18 @@ The NeoVim plugin stack is managed by `lazy.nvim` and includes:
 
 The lockfile lives at `nvim/lazy-lock.json` and should be committed after plugin updates.
 
+## Code completion
+
+LLM code completion is provided by [Minuet](https://github.com/milanglacier/minuet-ai.nvim) using its standalone virtual-text (ghost text) frontend, configured in `nvim/init.lua` with DeepSeek's native FIM (fill-in-the-middle) backend (`deepseek-v4-flash` at `https://api.deepseek.com/beta/completions`). It auto-triggers for all filetypes (`auto_trigger_ft = { "*" }`).
+
+Before use, export your API key in the shell that starts nvim (API keys live in the environment and are never committed):
+
+```bash
+export DEEPSEEK_API_KEY="sk-..."
+```
+
+Keymaps in insert mode: `<A-A>` accept, `<A-a>` accept line, `<A-z>` accept n lines, `<A-]>` next, `<A-[>` prev, `<A-e>` dismiss.
+
 ## Vim installation
 
 Link the legacy Vim config:

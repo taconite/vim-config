@@ -334,6 +334,41 @@ require("lazy").setup({
     name = "pi.nvim",
     lazy = false,
   },
+  {
+    "milanglacier/minuet-ai.nvim",
+    config = function()
+      require("minuet").setup({
+        -- DeepSeek native FIM (fill-in-the-middle) backend.
+        -- The only remaining step is: export DEEPSEEK_API_KEY=... in the
+        -- shell before launching nvim (never put the key in this file).
+        provider = "openai_fim_compatible",
+        virtualtext = {
+          -- empty list (the default) disables auto-triggering entirely; '*' = all filetypes
+          auto_trigger_ft = { "*" },
+          -- Minuet ships no keymaps by default (all nil in its schema), so the
+          -- documented Alt bindings must be set explicitly to work
+          keymap = {
+            accept = "<A-A>",
+            accept_line = "<A-a>",
+            accept_n_lines = "<A-z>",
+            next = "<A-]>",
+            prev = "<A-[>",
+            dismiss = "<A-e>",
+          },
+        },
+        provider_options = {
+          -- Minuet's schema defaults already match DeepSeek's FIM API:
+          -- model "deepseek-v4-flash",
+          -- end_point "https://api.deepseek.com/beta/completions"
+          openai_fim_compatible = {
+            -- name of the environment variable holding the API key;
+            -- Minuet resolves it via vim.env at request time (never commit a key)
+            api_key = "DEEPSEEK_API_KEY",
+          },
+        },
+      })
+    end,
+  },
 }, {
   lockfile = config_dir .. "/lazy-lock.json",
   change_detection = { notify = false },
